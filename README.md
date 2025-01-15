@@ -11,4 +11,4 @@ To analyze and identify trends in movie revenues by genre, year, and rating.
 - Excel: Data cleaning and basic statistical analysis.
 - Python: Advanced analytics and visualizations.
 - Power BI: Dashboard creation for deeper insights.
-![Revenue by Genre](Visualization/visualization.pdf)
+![Show Revenue by Genre](Visualization/visualization.pdf)
