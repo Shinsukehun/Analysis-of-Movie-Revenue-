@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df=pd.read_csv("data.csv")
+df=pd.read_csv("data movie.csv")
 df["Profit Revenue"]=(df['Revenue']-df['Budget'])/df['Budget']*100
 print(df)
 correlation=df["Rating"].corr(df["Revenue"])
