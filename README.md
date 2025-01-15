@@ -1,4 +1,3 @@
-This project is taitanic survival problem and analysis of Movie Revenue
 # Movies Revenue Analysis Project
 ### Objective
 To analyze and identify trends in movie revenues by genre, year, and rating.
