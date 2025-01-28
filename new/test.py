@@ -19,5 +19,5 @@ a=int(input())
 b=int(input())
 c=multiply(a,b)
 print(c)
-fruit=["apple","banana","cherry","tomato"]
+fruit=["apple","cherry","tomato"]
 print(fruit[1:4])
