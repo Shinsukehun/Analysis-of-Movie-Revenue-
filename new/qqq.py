@@ -17,3 +17,4 @@ elif age<13:
     print("child")
 else:
     print("teenager")
+print((age>10)&(age<50))
