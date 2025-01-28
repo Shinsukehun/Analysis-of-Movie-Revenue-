@@ -1,9 +1,9 @@
 age=int(input("your age:"))
-gender=input()
+gender=input("your gender")
 if(age>18):
     if gender=="male":
         print("Adult male")
     else:
         print("Adult female")
-elif(age<18):
+else:
     print("you are minor")
