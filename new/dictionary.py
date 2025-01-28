@@ -9,3 +9,4 @@ def greet(name="Shinsuke"):
     print(f"name:{name}")
 
 greet("Jhonson")
+greet()
