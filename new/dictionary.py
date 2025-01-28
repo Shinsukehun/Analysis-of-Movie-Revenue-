@@ -4,3 +4,8 @@ person["professional"]="Data Scientist"
 del person["age"]
 for key, value in person.items():
     print(f"{key}:{value}")
+
+def greet(name="Shinsuke"):
+    print(f"name:{name}")
+
+greet("Jhonson")
