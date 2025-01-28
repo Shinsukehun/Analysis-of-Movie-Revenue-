@@ -10,3 +10,10 @@ def greet(name="Shinsuke"):
 
 greet("Jhonson")
 greet()
+def min_max(numbers):
+    return min(numbers), max(numbers)
+nums=[1,5,3,9,7]
+x,y=min_max(nums)
+print(f"{x},{y}")
+square=[x**2 for x in nums]
+print(square)
