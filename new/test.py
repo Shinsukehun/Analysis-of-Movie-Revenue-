@@ -21,7 +21,3 @@ c=multiply(a,b)
 print(c)
 fruit=["apple","cherry","tomato"]
 print(fruit[1:4])
-def square_and_cube(x):
-    return x**2, x**3
-square, cube=square_and_cube(3)
-print("square:"+square,"cube:"+cube)
