@@ -19,6 +19,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 x=[1,2,3,4,5]
-y=[2,4,6,8,10]
-correlation=np.corrcoef(x,y)[0,1]
-print(f"{correlation}")
+y=[200, 400, 600, 800, 1000]    
+# correlation=np.corrcoef(x,y)[0,1]
+covariance = np.cov(x, y,ddof=0)[0, 1]
+print(f"{covariance}")
