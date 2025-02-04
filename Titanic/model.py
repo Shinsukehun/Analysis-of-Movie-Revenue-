@@ -2,13 +2,33 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
+from sklearn.model_selection import RandomizedSearchCV
+import shap
+from flask import Flask,request,jsonify
+import pickle
 
+param_grid_rf = {
+    "n_estimators": np.arange(50, 201, 50),
+    "max_depth": np.arange(3, 15, 1),
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4],
+    "bootstrap": [True, False]
+}
+param_grid_xgb = {
+    "n_estimators": np.arange(50, 201, 50),
+    "max_depth": [3, 6, 9, 12],
+    "learning_rate": [0.01, 0.05, 0.1, 0.2],
+    "subsample": [0.7, 0.8, 1.0],
+    "colsample_bytree": [0.7, 0.8, 1.0],
+    "gamma": [0, 0.1, 0.2, 0.3]
+}
 df=pd.read_csv("train.csv")
 
 df["Sex"]=df["Sex"].map({"male":0,"female":1})
@@ -32,6 +52,28 @@ y_pred_rf = rf_model.predict(x_test)
 y_pred_log = log_reg.predict(x_test)
 y_pred_xgb = xgb_model.predict(x_test)
 
+random_search_rf = RandomizedSearchCV(estimator=rf_model, param_distributions=param_grid_rf, 
+                                      n_iter=10, cv=3, random_state=42, n_jobs=-1)
+random_search_rf.fit(x_train, y_train)
+print("Best Hyperparameters for Random Forest:", random_search_rf.best_params_)
+
+# Evaluate on the test set
+best_rf_model = random_search_rf.best_estimator_
+y_pred_rf_tuned = best_rf_model.predict(x_test)
+print(f"Tuned Random Forest Accuracy: {accuracy_score(y_test, y_pred_rf_tuned):.4f}")
+
+random_search_xgb = RandomizedSearchCV(estimator=xgb_model, param_distributions=param_grid_xgb,
+                                       n_iter=10, cv=3, random_state=42)
+random_search_xgb.fit(x_train, y_train)
+
+# Best hyperparameters
+print("Best Hyperparameters for XGBoost:", random_search_xgb.best_params_)
+
+# Evaluate on the test set
+best_xgb_model = random_search_xgb.best_estimator_
+y_pred_xgb_tuned = best_xgb_model.predict(x_test)
+print(f"Tuned XGBoost Accuracy: {accuracy_score(y_test, y_pred_xgb_tuned):.4f}")
+
 rf_acc = accuracy_score(y_test, y_pred_rf)
 log_reg_acc = accuracy_score(y_test, y_pred_log)
 xgb_acc = accuracy_score(y_test, y_pred_xgb)
@@ -50,6 +92,53 @@ model_results = {
 # Print model accuracies
 for model, acc in model_results.items():
     print(f"{model}: {acc:.4f}")
+importances_rf=best_rf_model.feature_importances_
+feature_importance_df_rf = pd.DataFrame({
+    "Feature": x.columns,
+    "Importance": importances_rf
+}).sort_values(by="Importance", ascending=False)
+
+import shap
+import matplotlib.pyplot as plt
+import seaborn as sns
+import xgboost as xgb
+
+# Create a figure with two subplots for SHAP summary plots
+fig, axes = plt.subplots(1, 2, figsize=(20, 6))
+
+# Create SHAP explainer for Random Forest
+explainer_rf = shap.TreeExplainer(best_rf_model)
+shap_values_rf = explainer_rf.shap_values(x_test)
+
+plt.subplot(1, 2, 1)
+shap.summary_plot(shap_values_rf, x_test, show=False)
+plt.title("SHAP Summary - Random Forest")
+
+# Create SHAP explainer for XGBoost
+explainer_xgb = shap.TreeExplainer(best_xgb_model)
+shap_values_xgb = explainer_xgb.shap_values(x_test)
+
+plt.subplot(1, 2, 2)
+shap.summary_plot(shap_values_xgb, x_test, show=False)
+plt.title("SHAP Summary - XGBoost")
+
+
+# Create a figure with two subplots for feature importance
+
+
+# Plot feature importance for Random Forest
+sns.barplot(x="Importance", y="Feature", data=feature_importance_df_rf, palette="viridis", ax=axes[0])
+axes[0].set_title("Feature Importance - Random Forest")
+
+# Plot feature importance for XGBoost
+xgb.plot_importance(best_xgb_model, importance_type='weight', max_num_features=10, height=0.5, ax=axes[1])
+axes[1].set_title("Feature Importance - XGBoost")
+
+plt.tight_layout()
+plt.show()
+
+pickle.dump(best_rf_model, open("tuned_rf_model.pkl", "wb"))
+pickle.dump(best_xgb_model, open("tuned_xgb_model.pkl", "wb"))
 # log_reg=LogisticRegression(max_iter=1000)
 # log_reg.fit(x_train,y_train)
 # y_pred_log=log_reg.predict(x_test)
